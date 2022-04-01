@@ -1,4 +1,8 @@
 <div align="center">
+ <img src="https://files.catbox.moe/paizyg.png" width="200" height="200" alt="FlxBot">
+</div>
+
+<div align="center">
 
 # FlxBot(开发中)
 
