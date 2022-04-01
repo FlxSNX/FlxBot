@@ -4,7 +4,7 @@
 
  _🤖 基于 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 与 FlxPHP 的QQ机器人 🤖_
   
- ![PHP](https://img.shields.io/badge/PHP-%207.4-green?style=flat-square&logo=php)
+ ![PHP](https://img.shields.io/badge/PHP-%207.0+-green?style=flat-square&logo=php)
  ![LICENSE](https://img.shields.io/badge/LICENSE-MIT-orange?style=flat-square)
 
 </div>
