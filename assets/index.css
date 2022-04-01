@@ -1,0 +1,83 @@
+body{
+    font-family: PingFang SC,Helvetica Neue,Microsoft YaHei,sans-serif!important;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+    background-color: #F1F2F3;
+    font-size: 14px;
+    user-select: none;
+}
+
+body>.wrapper{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    overflow: hidden;
+    background-image: url(https://cdn.jsdelivr.net/gh/hututu-tech/IMG-gongfeng@main/2022/03/06/6223be981e3df.jpg);
+}
+
+body>.wrapper>.container{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .4);
+    backdrop-filter: blur(8px);
+}
+
+.content{
+    position: relative;
+    color: #fff;
+    text-align: center;
+}
+
+.content>h2,.content>h3{
+    font-weight: 400!important;
+    line-height: 24px;
+}
+
+.content>h2{
+    font-size: 24px;
+}
+
+.content>a{
+    background-color: rgba(0, 0, 0, .2);
+    line-height: 42px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: inherit;
+}
+
+footer{
+    position: absolute;
+    width: 100vw;
+    left: 0;
+    bottom: 16px;
+    color: #fff;
+    text-align: center;
+}
+
+footer>a{
+    /* text-decoration: none; */
+    color: inherit;
+}
+
+input{
+    border: none;
+    outline: none;
+    height: 18px;
+    border-radius: 30px;
+    padding: 10px;
+    font-size: 13px;
+    color: #fff;
+    background-color: rgba(0, 0, 0, .2);
+}

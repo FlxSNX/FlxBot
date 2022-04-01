@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Console - FlxBot</title>
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<link href="https://cdn.bootcdn.net/ajax/libs/mdui/1.0.2/css/mdui.min.css" rel="stylesheet">
+	<script src="https://cdn.bootcdn.net/ajax/libs/mdui/1.0.2/js/mdui.min.js"></script>
+</head>
+<style>
+    .mdui-switch-icon:before{
+        box-shadow: none!important;
+    }
+
+    body{
+        background-color: #f1f2f3;
+    }
+</style>
+<body class="mdui-theme-primary-indigo mdui-theme-accent-blue">
+    <div class="mdui-container">
+        <div class="mdui-row">
+            <div class="mdui-col-md-6 mdui-m-y-2">
+                <div class="mdui-card">
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title">Bot Console</div>
+                        <div class="mdui-card-primary-subtitle">机器人控制台</div>
+                    </div>
+
+                    <?php if($bot) { ?>
+                    <div class="mdui-card-header mdui-color-blue-accent">
+                        <img class="mdui-card-header-avatar" src="http://q1.qlogo.cn/g?b=qq&nk=<?=$bot->user_id?>&s=160"/>
+                        <div class="mdui-card-header-title"><?=$bot->nickname?></div>
+                        <div class="mdui-card-header-subtitle"><?=$bot->user_id?></div>
+                    </div>
+                    <?php }else{ ?>
+                        <div class="mdui-card-header mdui-color-blue-accent">
+                            <div class="mdui-typo-body-2">机器人貌似没运行呢~</div>
+                            <div class="mdui-typo-body-2 mdui-m-t-1">或是API配置错误</div>
+                        </div>
+                    <?php } ?>
+
+                    <div class="mdui-card-content">
+                        <div class="mdui-typo-title">插件列表</div>
+                        <ul class="mdui-list" style="max-height: 260px;overflow-y: scroll;">
+                            <?php if($plugins){ ?>
+                            <?php foreach($plugins as $name=>$plugin){ ?>
+                            <li class="mdui-list-item">
+                                <i class="mdui-list-item-icon mdui-icon material-icons"><?=$plugin['info']['icon'] ?: 'settings_ethernet' ?></i>
+                                <div class="mdui-list-item-content"><?=$plugin['info']['name']?><div class="mdui-typo-body-2">[<?=$name?>]@<?=$plugin['info']['version']?> by <?=$plugin['info']['author']?></div></div>
+                                <label class="mdui-switch">
+                                <input pluginName="<?=$name?>" type="checkbox" <?=($plugin['enable'] == true) ? 'checked' : '' ?> />
+                                    <i class="mdui-switch-icon"></i>
+                                </label>
+                            </li>
+                            <?php } ?>
+                            <?php }else{ ?>
+
+                            <?php } ?>
+                        </ul>
+                        <div class="mdui-card-content">
+                            <div class="mdui-typo-title">群聊列表</div>
+                            <ul class="mdui-list" style="max-height: 280px;overflow-y: scroll;">
+                                <?php if($groups){ ?>
+                                <?php foreach($groups as $group){ ?>
+                                <li class="mdui-list-item">
+                                    <i class="mdui-list-item-icon mdui-icon material-icons">group</i>
+                                    <div class="mdui-list-item-content"><?=$group->group_name?><div class="mdui-typo-body-2"><?=$group->group_id?>(<?=$group->member_count?>/<?=$group->max_member_count?>)</div></div>
+                                    <label class="mdui-switch">
+                                    <input group_id="<?=$group->group_id?>" type="checkbox" <?=($group->enable == true) ? 'checked' : '' ?> />
+                                        <i class="mdui-switch-icon"></i>
+                                    </label>
+                                </li>
+                                <?php } ?>
+                                <?php }else{ ?>
+    
+                                <?php } ?>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mdui-card-actions mdui-float-right">
+                        <button class="mdui-btn mdui-ripple mdui-btn-dense mdui-btn-raised mdui-color-blue-accent" id="save">保存设置</button>
+                        <button class="mdui-btn mdui-ripple mdui-btn-dense mdui-btn-raised mdui-color-pink-accent">重启Bot</button>
+                    </div>
+                </div>
+            </div>
+            <div class="mdui-col-md-6 mdui-m-y-2">
+                <div class="mdui-card">
+
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title">Message</div>
+                        <div class="mdui-card-primary-subtitle">最近20条消息</div>
+                    </div>
+    
+                    <div class="mdui-card-content">
+                        <ul class="mdui-list" id="msg" style="height: 300px;overflow-y: scroll;">
+                            
+                        </ul>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+	
+    <script>
+        $(function(){
+            $('#save').on('click',function(){
+                let param = {};
+                $("[pluginName]input:checked").each(function(index,e){
+                    param[e.getAttribute('pluginName')] = "true";
+                });
+                console.log(param);
+                $.ajax({
+                    url:"/console/pluginSetings/save",
+                    data:param,
+                    dataType:'json',
+                    type:"POST",
+                    success:function(data){
+                        mdui.snackbar({
+                            message: data.msg,
+                            position: 'top',
+                        });
+                    },
+                    error:function(){
+                        mdui.snackbar({
+                            message: '请求出错',
+                            position: 'top',
+                        });
+                    }
+                });
+            });
+
+            loadMsg();
+            setInterval(() => {
+                loadMsg();
+            }, 3000);
+        })
+
+        function loadMsg(){
+            $.ajax({
+                url:"/console/getMsg",
+                dataType:'json',
+                type:"GET",
+                success:function(data){
+                    $('#msg').html('');
+                    $.each(data,function(index,data){
+                        $('#msg').append('<li class="mdui-list-item mdui-ripple"><div class="mdui-typo-body-2">'+data+'</div></li>');
+                    });
+                },
+                error:function(){
+                    mdui.snackbar({
+                        message: '获取消息失败',
+                        position: 'top',
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
