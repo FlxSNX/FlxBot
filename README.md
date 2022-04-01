@@ -10,6 +10,8 @@
   
  ![PHP](https://img.shields.io/badge/PHP-%207.0+-green?style=flat-square&logo=php)
  ![LICENSE](https://img.shields.io/badge/LICENSE-MIT-orange?style=flat-square)
+ 
+ FlxPHP 是我造的一个轮子(框架) 用于QQ机器人的FlxPHP进行了部分阉割
 
 </div>
 
