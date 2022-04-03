@@ -2,6 +2,7 @@
 namespace app\controller;
 class cqhttp{
     private $plugins = [];
+    private $groupsConf = [];
 
     // 初始化
     public function __init(){
@@ -23,10 +24,19 @@ class cqhttp{
                 if($enable == true){
                     $class = '\plugins\\'.$plugin;
                     include_once APPDIR.'plugins/'.$plugin;
+                    if(method_exists($plugin,'plugin')){
+                        $plugin::plugin();
+                    }
                     $this->plugins[] = $class;
                 }
             }
         }
+    }
+
+    // 加载群聊配置
+    private function loadGroupConf(){
+        $groupsConf = json_decode(file_get_contents(APPDIR.'groups.json'),true);
+        $this->groupsConf = $groupsConf;
     }
 
     // 调用插件方法
@@ -38,10 +48,6 @@ class cqhttp{
                 }
             }
         }
-    }
-
-    public function test(){
-        var_dump(\plugins\Test::private_msg($request));
     }
 
     // 处理机器人上报消息
@@ -57,8 +63,17 @@ class cqhttp{
 
                 case 'group':
                     if($request->sub_type == "normal"){
-                        $this->callPlugin("group_message",$request);
-                        file_put_contents(ROOTDIR.'log/'.date("Y-m-d H").'-msg.log','['.date("Y-m-d H:i:s").'][群聊消息]['.$request->group_id.']('.$request->user_id.')'.$request->sender->nickname.':'.$request->message.PHP_EOL,FILE_APPEND | LOCK_EX);
+                        $this->loadGroupConf();
+                        if($this->groupsConf[$request->group_id] == true){
+                            $this->callPlugin("group_message",$request);
+                            file_put_contents(ROOTDIR.'log/'.date("Y-m-d H").'-msg.log','['.date("Y-m-d H:i:s").'][群聊消息]['.$request->group_id.']('.$request->user_id.')'.$request->sender->nickname.':'.$request->message.PHP_EOL,FILE_APPEND | LOCK_EX);
+                        }else{
+                            // cqhttp('send_group_msg',[
+                            //     'group_id' => $request->group_id,
+                            //     'message' => '[CQ:reply,id='.$request->message_id.']'."Bot未对此群开放"
+                            // ]);
+                            file_put_contents(ROOTDIR.'log/'.date("Y-m-d H").'-msg.log','['.date("Y-m-d H:i:s").'][未授权的群聊消息]['.$request->group_id.']('.$request->user_id.')'.$request->sender->nickname.':'.$request->message.PHP_EOL,FILE_APPEND | LOCK_EX);
+                        } 
                     }
                 break;
             }

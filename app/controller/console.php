@@ -10,8 +10,7 @@ class console{
     public function index(){
         $result = json_decode(cqhttp("get_login_info",[]));
         $bot = $result;
-        $result = json_decode(cqhttp("get_group_list",[]));
-        $groups = $result->data;
+        $groups = $this->loadGroups();
         assign([
             'bot' => $bot->data,
             'plugins' => $this->plugins,
@@ -29,6 +28,28 @@ class console{
         }
     }
 
+    public function groupSetingsSave(){
+        $group = post('group_id');
+        $change = post('change');
+        if($group && $change){
+            $groupsConf = json_decode(file_get_contents(APPDIR.'groups.json'),true);
+            if($change == 'true' && $groupsConf){
+                $groupsConf[$group] = true;
+            }else{
+                $groupsConf[$group] = false;
+            }
+            $save = file_put_contents(APPDIR.'groups.json',json_encode($groupsConf));
+            if($save){
+                return '{"status":200,"msg":"群聊设置保存成功"}';
+            }else{
+                return '{"status":-400,"msg":"群聊设置保存失败"}';
+            }
+        }else{
+            return '{"status":-400,"msg":"参数错误"}';
+        }
+    
+    }
+
     public function getMsg(){  
         $msgfile = file_get_contents(ROOTDIR.'log/'.date("Y-m-d H").'-msg.log');
         $msg = explode(PHP_EOL,$msgfile);
@@ -40,6 +61,7 @@ class console{
         }
     }
 
+    // 加载插件信息
     private function loadPlugins(){
         $pluginsConf = json_decode(file_get_contents(APPDIR.'plugins.json'),true);
         $plugins = glob(APPDIR.'plugins/*.php');
@@ -50,5 +72,23 @@ class console{
                 $this->plugins[explode('.',$filename)[0]] = ['info' => $class::$pluginInfo,'enable' => $pluginsConf[explode('.',$filename)[0]] ?? false];
             }
         }
+    }
+
+    // 加载群聊配置&信息
+    private function loadGroups(){
+        $groupsConf = json_decode(file_get_contents(APPDIR.'groups.json'),true);
+        $result = json_decode(cqhttp("get_group_list",[]));
+        $groupsObj = $result->data;
+        $groups = [];
+        if($groupsObj){
+            foreach($groupsObj as $group){
+                $groups[$group->group_id] = [
+                    'info' => $group,
+                    'enable' => $groupsConf[$group->group_id] ?: false
+                ];
+            }
+        }
+
+        return $groups;
     }
 }

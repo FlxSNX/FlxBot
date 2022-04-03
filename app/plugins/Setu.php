@@ -15,36 +15,26 @@ class Setu{
         'size' => 'regular'
     ];
 
-    /** 
-     *  先向客户端返回一个消息 再执行后续代码 防止超时造成多次请求
-     *  仅在Windows Apache 上测试 成功运行
-     * */ 
-    public static function ret($request,\Closure $callback){
-        ob_end_clean();
-        header("Connection: close");
-        header("HTTP/1.1 200 OK");
-        ob_start();
-        $callback($request);
-        $size=ob_get_length();
-        header("Content-Length: $size");
-        ob_end_flush();
-        ob_flush();
-        flush();
-        set_time_limit(0);
-    }
-
     // 私聊消息事件
     public static function private_message($request){
         if($request->message == 'setu'){
-            self::ret($request,function($request){
+            cqret($request,function($request){
                 cqhttp('send_private_msg',[
                     'user_id' => $request->user_id,
                     'message' => '[CQ:reply,id='.$request->message_id.']'."少女祈祷中..."
                 ]);
             });
-            return cqhttp('send_private_msg',[
+
+            $result = cqhttp('send_private_msg',[
                 'user_id' => $request->user_id,
                 'message' => '[CQ:reply,id='.$request->message_id.']'.self::getSetu()
+            ]);
+
+            // 发送后5秒撤回
+            $result = json_decode($result);
+            sleep(5);
+            return cqhttp('delete_msg',[
+                'message_id' => $result->data->message_id
             ]);
         }
     }
@@ -52,15 +42,23 @@ class Setu{
     // 群聊消息事件
     public static function group_message($request){
         if($request->message == 'setu'){
-            self::ret($request,function($request){
+            cqret($request,function($request){
                 cqhttp('send_group_msg',[
                     'group_id' => $request->group_id,
                     'message' => '[CQ:reply,id='.$request->message_id.']'."少女祈祷中..."
                 ]);
             });
-            return cqhttp('send_group_msg',[
+
+            $result = cqhttp('send_group_msg',[
                 'group_id' => $request->group_id,
                 'message' => '[CQ:reply,id='.$request->message_id.']'.self::getSetu()
+            ]);
+
+            // 发送后5秒撤回
+            $result = json_decode($result);
+            sleep(5);
+            return cqhttp('delete_msg',[
+                'message_id' => $result->data->message_id
             ]);
         }
     }

@@ -42,6 +42,24 @@ function cqhttp($action,$param){
 	return $result;
 }
 
+/** 
+ *  先回应机器人的消息上报 再执行后续代码 防止超时造成多次请求
+ *  仅在Windows Apchea 上测试 Linux以及Nginx兼容性未知 -- 后续测试
+ * */ 
+function cqret($request,\Closure $callback){
+	ob_end_clean();
+	header("Connection: close");
+	header("HTTP/1.1 200 OK");
+	ob_start();
+	$callback($request);
+	$size=ob_get_length();
+	header("Content-Length: $size");
+	ob_end_flush();
+	ob_flush();
+	flush();
+	set_time_limit(0);
+}
+
 // Cookie加密解密
 function cookie_crypt($data,$secret,$action='encode'){
 	if($action == 'encode'){
