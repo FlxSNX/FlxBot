@@ -21,7 +21,7 @@ class Setu{
 
     // 私聊消息事件
     public static function private_message($request){
-        if($request->message == 'setu'){
+        if($request->message == 'setu' or (strpos($request->message,' ') and explode(' ',$request->message)[0] == "setu")){
             self::$request = $request;
             self::sendSetu();
         }
@@ -29,7 +29,7 @@ class Setu{
 
     // 群聊消息事件
     public static function group_message($request){  
-        if($request->message == 'setu'){
+        if($request->message == 'setu' or (strpos($request->message,' ') and explode(' ',$request->message)[0] == "setu")){
             self::$request = $request;
             self::sendSetu('group');
         }
@@ -99,7 +99,7 @@ class Setu{
             cqhttp('delete_msg',[
                 'message_id' => $result2->data->message_id
             ]);
-            if($action == "group"){
+            if($type == "group"){
                 cqhttp('delete_msg',[
                     'message_id' => self::$request->message_id
                 ]);
