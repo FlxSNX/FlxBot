@@ -10,11 +10,7 @@ class Test{
 
     // 加载插件事件
     public static function plugin(){
-        return [
-            'name' => '测试插件',
-            'version' => '1.0.0',
-            'author' => 'FlxSNX'
-        ];
+        
     }
 
     // 私聊消息事件

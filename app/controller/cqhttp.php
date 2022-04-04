@@ -53,7 +53,20 @@ class cqhttp{
     // 处理机器人上报消息
     public function index(){
         $request = $this->request();
-        if($request->meta_event_type == 'heartbeat')return file_put_contents(ROOTDIR.'log/heartbeat.log','['.date("Y-m-d H:i:s").']heartbeat'.PHP_EOL,FILE_APPEND | LOCK_EX);
+        if($request->meta_event_type == 'heartbeat'){
+            ob_end_clean();
+            header("Connection: close");
+            header("HTTP/1.1 200 OK");
+            ob_start();
+            $this->callPlugin("cron",$request);
+            return file_put_contents(ROOTDIR.'log/heartbeat.log','['.date("Y-m-d H:i:s").']heartbeat'.PHP_EOL,FILE_APPEND | LOCK_EX);
+            $size=ob_get_length();
+            header("Content-Length: $size");
+            ob_end_flush();
+            ob_flush();
+            flush();
+            set_time_limit(0);
+        }
         if($request && $request->message_type){
             switch($request->message_type){
                 case 'private':

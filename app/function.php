@@ -51,7 +51,7 @@ function cqret($request,\Closure $callback){
 	header("Connection: close");
 	header("HTTP/1.1 200 OK");
 	ob_start();
-	$callback($request);
+	return $callback($request);
 	$size=ob_get_length();
 	header("Content-Length: $size");
 	ob_end_flush();
