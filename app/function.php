@@ -45,6 +45,7 @@ function cqhttp($action,$param){
 /** 
  *  先回应机器人的消息上报 再执行后续代码 防止超时造成多次请求
  *  仅在Windows Apchea 上测试 Linux以及Nginx兼容性未知 -- 后续测试
+ *  发现并未达到需要的效果...  不知道当时怎么测试的 等待解决(22-06-26)
  * */ 
 function cqret($request,\Closure $callback){
 	ob_end_clean();
